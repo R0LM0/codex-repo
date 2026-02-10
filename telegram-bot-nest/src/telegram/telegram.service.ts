@@ -1,5 +1,6 @@
-﻿import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { Bot } from "grammy";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
@@ -66,7 +67,18 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           return;
         }
 
-        await this.bot.api.sendMessage(chatId, "STT_PROVIDER configurado, pero la integracion no esta implementada.");
+        if (sttProvider !== "whispercpp") {
+          await this.bot.api.sendMessage(chatId, `STT_PROVIDER '${sttProvider}' no soportado aun.`);
+          return;
+        }
+
+        const transcript = await this.transcribeWithWhisperCpp(oggPath);
+        if (!transcript) {
+          await this.bot.api.sendMessage(chatId, "No pude transcribir el audio.");
+          return;
+        }
+
+        await this.bot.api.sendMessage(chatId, `Transcripcion: ${transcript}`);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         await this.bot?.api.sendMessage(chatId, `Error procesando audio: ${message}`);
@@ -84,5 +96,65 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       throw new Error(`No se pudo descargar audio (${res.status})`);
     }
     await pipeline(res.body, fs.createWriteStream(filePath));
+  }
+
+  private async transcribeWithWhisperCpp(oggPath: string) {
+    const whisperPath = process.env.WHISPER_CPP_PATH;
+    const modelPath = process.env.WHISPER_MODEL_PATH;
+    const ffmpegPath = process.env.FFMPEG_PATH || "ffmpeg";
+
+    if (!whisperPath || !modelPath) {
+      throw new Error("Faltan WHISPER_CPP_PATH o WHISPER_MODEL_PATH en .env");
+    }
+
+    const tempDir = path.dirname(oggPath);
+    const baseName = path.basename(oggPath, ".ogg");
+    const wavPath = path.join(tempDir, `${baseName}.wav`);
+    const outPrefix = path.join(tempDir, `${baseName}`);
+    const outTxt = `${outPrefix}.txt`;
+
+    await this.runCommand(ffmpegPath, [
+      "-y",
+      "-i",
+      oggPath,
+      "-ar",
+      "16000",
+      "-ac",
+      "1",
+      "-c:a",
+      "pcm_s16le",
+      wavPath
+    ]);
+
+    await this.runCommand(whisperPath, [
+      "-m",
+      modelPath,
+      "-f",
+      wavPath,
+      "-otxt",
+      "-of",
+      outPrefix
+    ]);
+
+    const text = await fsp.readFile(outTxt, "utf8");
+    return text.trim();
+  }
+
+  private async runCommand(command: string, args: string[]) {
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(command, args, { windowsHide: true });
+      let stderr = "";
+      child.stderr.on("data", (chunk) => {
+        stderr += String(chunk);
+      });
+      child.on("error", reject);
+      child.on("close", (code) => {
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        reject(new Error(`${command} fallo (code ${code}): ${stderr.trim()}`));
+      });
+    });
   }
 }

@@ -26,4 +26,20 @@ WHISPER_CPP_PATH=...
 FFMPEG_PATH=...
 WHISPER_MODEL_PATH=...
 
-Este repo deja el hook preparado, pero no instala whisper.cpp.
+Notas:
+- `FFMPEG_PATH` puede ser `ffmpeg` si esta en PATH.
+- `WHISPER_CPP_PATH` debe apuntar al ejecutable (por ejemplo `main.exe`).
+
+## Instalacion automatica (Windows)
+
+Ejecuta este script para descargar whisper.cpp, un modelo y configurar `.env`:
+
+```powershell
+.\scripts\install-whispercpp.ps1
+```
+
+Por defecto usa `ggml-base.bin`. Para otro modelo:
+
+```powershell
+.\scripts\install-whispercpp.ps1 -ModelName ggml-tiny.bin
+```
