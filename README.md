@@ -21,8 +21,31 @@ codex exec "hola"
 
 - Ver `examples/01-hola.txt` y `examples/02-resumen.txt`.
 
-## Tips
+## Telegram bot (Node, local)
 
-- `codex login` abre el navegador para autenticar.
-- Puedes ajustar el modelo con `-m` o `--model`.
-- Si falla por repo no confiable, mueve el workdir al repo o usa `--skip-git-repo-check`.
+- Carpeta: `telegram-bot/`
+- Copia `.env.example` a `.env` y coloca tu token de BotFather
+- `npm install`
+- `npm run start`
+
+## Voz (gratis)
+
+- El bot acepta mensajes de voz y responde con texto.
+- Para transcripcion gratis, puedes integrar `whisper.cpp` local (ver `telegram-bot/README.md`).
+
+## MCP (nota simple)
+
+- Carpeta: `mcp/`
+- `npm install`
+- `npm run start`
+- Registrar en Codex:
+
+```bash
+codex mcp add notes -- node D:\WORKSPACES\AGENTES\CODEX\codex-repo\mcp\src\server.js
+```
+
+- Verificar:
+
+```bash
+codex mcp list
+```
