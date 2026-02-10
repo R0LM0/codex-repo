@@ -25,10 +25,12 @@ STT_PROVIDER=whispercpp
 WHISPER_CPP_PATH=...
 FFMPEG_PATH=...
 WHISPER_MODEL_PATH=...
+WHISPER_LANGUAGE=es
 
 Notas:
 - `FFMPEG_PATH` puede ser `ffmpeg` si esta en PATH.
 - `WHISPER_CPP_PATH` debe apuntar a `whisper-cli.exe` si esta disponible (o `main.exe` como fallback).
+- `WHISPER_LANGUAGE=es` fuerza español (evita "speaking in foreign language").
 
 ## Instalacion automatica (Windows)
 
@@ -43,3 +45,21 @@ Por defecto usa `ggml-base.bin`. Para otro modelo:
 ```powershell
 .\scripts\install-whispercpp.ps1 -ModelName ggml-tiny.bin
 ```
+
+## IA (LM Studio)
+
+Para respuestas inteligentes (texto y voz), activa LM Studio:
+
+```
+LLM_PROVIDER=lmstudio
+LLM_BASE_URL=http://127.0.0.1:1234
+LLM_API_KEY=
+LLM_MODEL=
+LLM_TEMPERATURE=0.7
+LLM_MAX_TOKENS=256
+```
+
+Notas:
+- Si LM Studio no requiere auth, deja `LLM_API_KEY` vacio.
+- Si activas auth en LM Studio, coloca el token en `LLM_API_KEY`.
+- Si no configuras `LLM_MODEL`, el bot usara el primer modelo disponible en LM Studio.

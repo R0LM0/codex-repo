@@ -121,6 +121,7 @@ function Set-EnvLine {
 Set-EnvLine -Key "STT_PROVIDER" -Value "whispercpp"
 Set-EnvLine -Key "WHISPER_CPP_PATH" -Value $cliExe.FullName
 Set-EnvLine -Key "WHISPER_MODEL_PATH" -Value $modelPath
+Set-EnvLine -Key "WHISPER_LANGUAGE" -Value "es"
 Set-EnvLine -Key "FFMPEG_PATH" -Value $ffmpegPath
 
 Write-Host "Listo. Reinicia el bot con: pnpm run start:dev"
