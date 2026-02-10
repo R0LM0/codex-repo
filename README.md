@@ -23,10 +23,17 @@ codex exec "hola"
 
 ## Telegram bot (Node, local)
 
-- Carpeta: `telegram-bot/`
+- Carpeta: `telegram-bot/` (version simple)
 - Copia `.env.example` a `.env` y coloca tu token de BotFather
 - `npm install`
 - `npm run start`
+
+## Telegram bot (NestJS + TS, local)
+
+- Carpeta: `telegram-bot-nest/`
+- Copia `.env.example` a `.env` y coloca tu token de BotFather
+- `npm install`
+- `npm run start:dev`
 
 ## Voz (gratis)
 
