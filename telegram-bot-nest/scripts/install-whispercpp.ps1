@@ -63,6 +63,24 @@ if ($needsModel) {
   Invoke-WebRequest -Uri $modelUrl -OutFile $modelPath
 }
 
+$ffmpegPath = $null
+$cmd = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if ($cmd) {
+  $ffmpegPath = $cmd.Source
+}
+if (-not $ffmpegPath) {
+  $winGetRoot = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Packages"
+  if (Test-Path $winGetRoot) {
+    $found = Get-ChildItem -Path $winGetRoot -Recurse -Filter ffmpeg.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($found) {
+      $ffmpegPath = $found.FullName
+    }
+  }
+}
+if (-not $ffmpegPath) {
+  $ffmpegPath = "ffmpeg"
+}
+
 $envPath = Join-Path $repoRoot ".env"
 if (-not (Test-Path $envPath)) {
   Copy-Item (Join-Path $repoRoot ".env.example") $envPath
@@ -100,6 +118,6 @@ function Set-EnvLine {
 Set-EnvLine -Key "STT_PROVIDER" -Value "whispercpp"
 Set-EnvLine -Key "WHISPER_CPP_PATH" -Value $mainExe.FullName
 Set-EnvLine -Key "WHISPER_MODEL_PATH" -Value $modelPath
-Set-EnvLine -Key "FFMPEG_PATH" -Value "ffmpeg"
+Set-EnvLine -Key "FFMPEG_PATH" -Value $ffmpegPath
 
 Write-Host "Listo. Reinicia el bot con: pnpm run start:dev"
