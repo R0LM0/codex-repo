@@ -56,3 +56,7 @@ codex mcp add notes -- node D:\WORKSPACES\AGENTES\CODEX\codex-repo\mcp\src\serve
 ```bash
 codex mcp list
 ```
+
+## LM Studio MCP
+
+Archivo de ejemplo para LM Studio en `lmstudio/mcp.json` (incluye MCP local + Hugging Face + Playwright).

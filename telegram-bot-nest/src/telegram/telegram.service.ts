@@ -116,31 +116,46 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   private async callLmStudio(userText: string) {
     const baseUrl = String(process.env.LLM_BASE_URL || "http://127.0.0.1:1234").replace(/\/$/, "");
-    const apiKey = String(process.env.LLM_API_KEY || "lm-studio");
+    const apiKey = String(process.env.LLM_API_KEY || "").trim();
     const model = await this.resolveLmStudioModel(baseUrl, apiKey);
     const systemPrompt = String(
       process.env.LLM_SYSTEM_PROMPT ||
-        "Responde en español de forma clara y breve. Si falta contexto, pregunta."
+        "Responde en espanol de forma clara y breve. Si falta contexto, pregunta."
     );
     const temperature = Number(process.env.LLM_TEMPERATURE || "0.7");
     const maxTokens = Number(process.env.LLM_MAX_TOKENS || "256");
+    const contextLength = Number(process.env.LLM_CONTEXT_LENGTH || "0");
+    const reasoning = String(process.env.LLM_REASONING || "").trim();
+    const integrations = this.parseIntegrations();
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userText }
-      ],
+      input: userText,
+      system_prompt: systemPrompt,
       temperature,
-      max_tokens: maxTokens
+      max_output_tokens: maxTokens
     };
 
-    const res = await fetch(`${baseUrl}/v1/chat/completions`, {
+    if (contextLength > 0) {
+      payload.context_length = contextLength;
+    }
+    if (reasoning) {
+      payload.reasoning = reasoning;
+    }
+    if (integrations) {
+      payload.integrations = integrations;
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json"
+    };
+    if (apiKey) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+
+    const res = await fetch(`${baseUrl}/api/v1/chat`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
+      headers,
       body: JSON.stringify(payload)
     });
 
@@ -150,26 +165,59 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
 
     const data = await res.json();
-    const content = data?.choices?.[0]?.message?.content;
-    const trimmed = typeof content === "string" ? content.trim() : "";
+    const output = Array.isArray(data?.output) ? data.output : [];
+    const messages = output
+      .filter((item: any) => item?.type === "message" && typeof item?.content === "string")
+      .map((item: any) => item.content.trim())
+      .filter(Boolean);
+
+    if (messages.length > 0) {
+      return messages.join("\n");
+    }
+
+    const fallback = output?.[0]?.content;
+    const trimmed = typeof fallback === "string" ? fallback.trim() : "";
     return trimmed || "No tengo respuesta.";
+  }
+
+  private parseIntegrations() {
+    const raw = String(process.env.LLM_INTEGRATIONS || "").trim();
+    if (!raw) return undefined;
+
+    try {
+      return JSON.parse(raw);
+    } catch {
+      const parts = raw
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+      return parts.length > 0 ? parts : undefined;
+    }
   }
 
   private async resolveLmStudioModel(baseUrl: string, apiKey: string) {
     if (process.env.LLM_MODEL) return process.env.LLM_MODEL;
     if (this.lmStudioModel) return this.lmStudioModel;
 
-    const res = await fetch(`${baseUrl}/v1/models`, {
-      headers: { Authorization: `Bearer ${apiKey}` }
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`No pude obtener modelos: ${res.status} ${text}`);
+    const headers: Record<string, string> = {};
+    if (apiKey) {
+      headers.Authorization = `Bearer ${apiKey}`;
     }
-    const data = await res.json();
+
+    const candidates = [`${baseUrl}/api/v1/models`, `${baseUrl}/v1/models`];
+    let data: any = null;
+
+    for (const url of candidates) {
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        data = await res.json();
+        break;
+      }
+    }
+
     const model = data?.data?.[0]?.id;
     if (!model) {
-      throw new Error("No encontre modelos en LM Studio.");
+      throw new Error("No encontre modelos en LM Studio. Configura LLM_MODEL en .env.");
     }
     this.lmStudioModel = model;
     return model;

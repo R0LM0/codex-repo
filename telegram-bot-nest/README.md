@@ -55,11 +55,25 @@ LLM_PROVIDER=lmstudio
 LLM_BASE_URL=http://127.0.0.1:1234
 LLM_API_KEY=
 LLM_MODEL=
+LLM_INTEGRATIONS=
 LLM_TEMPERATURE=0.7
 LLM_MAX_TOKENS=256
+LLM_CONTEXT_LENGTH=
+LLM_REASONING=
 ```
 
 Notas:
 - Si LM Studio no requiere auth, deja `LLM_API_KEY` vacio.
 - Si activas auth en LM Studio, coloca el token en `LLM_API_KEY`.
 - Si no configuras `LLM_MODEL`, el bot usara el primer modelo disponible en LM Studio.
+- `LLM_INTEGRATIONS` acepta JSON (ej: `["mcp/playwright"]`) o lista separada por comas.
+
+Ejemplos de `LLM_INTEGRATIONS`:
+
+```
+["mcp/playwright"]
+```
+
+```
+[{"type":"ephemeral_mcp","server_label":"huggingface","server_url":"https://huggingface.co/mcp","allowed_tools":["model_search"]}]
+```

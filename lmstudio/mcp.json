@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "codex-notes": {
+      "command": "node",
+      "args": ["D:\\WORKSPACES\\AGENTES\\CODEX\\codex-repo\\mcp\\src\\server.js"]
+    },
+    "hf-mcp-server": {
+      "url": "https://huggingface.co/mcp",
+      "headers": {
+        "Authorization": "Bearer <TU_TOKEN_HF>"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }
+  }
+}
