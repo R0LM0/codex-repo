@@ -1,0 +1,1 @@
+﻿codex exec "Resume README.md en 5 lineas"
