@@ -28,7 +28,7 @@ WHISPER_MODEL_PATH=...
 
 Notas:
 - `FFMPEG_PATH` puede ser `ffmpeg` si esta en PATH.
-- `WHISPER_CPP_PATH` debe apuntar al ejecutable (por ejemplo `main.exe`).
+- `WHISPER_CPP_PATH` debe apuntar a `whisper-cli.exe` si esta disponible (o `main.exe` como fallback).
 
 ## Instalacion automatica (Windows)
 

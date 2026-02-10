@@ -44,9 +44,12 @@ Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
 Expand-Archive -Path $zipPath -DestinationPath $installRoot -Force
 Remove-Item $zipPath -Force
 
-$mainExe = Get-ChildItem -Path $installRoot -Recurse -Filter "main.exe" | Select-Object -First 1
-if (-not $mainExe) {
-  throw "No encontre main.exe en el paquete descargado."
+$cliExe = Get-ChildItem -Path $installRoot -Recurse -Filter "whisper-cli.exe" | Select-Object -First 1
+if (-not $cliExe) {
+  $cliExe = Get-ChildItem -Path $installRoot -Recurse -Filter "main.exe" | Select-Object -First 1
+}
+if (-not $cliExe) {
+  throw "No encontre whisper-cli.exe ni main.exe en el paquete descargado."
 }
 
 $modelPath = Join-Path $installRoot $ModelName
@@ -116,7 +119,7 @@ function Set-EnvLine {
 }
 
 Set-EnvLine -Key "STT_PROVIDER" -Value "whispercpp"
-Set-EnvLine -Key "WHISPER_CPP_PATH" -Value $mainExe.FullName
+Set-EnvLine -Key "WHISPER_CPP_PATH" -Value $cliExe.FullName
 Set-EnvLine -Key "WHISPER_MODEL_PATH" -Value $modelPath
 Set-EnvLine -Key "FFMPEG_PATH" -Value $ffmpegPath
 
