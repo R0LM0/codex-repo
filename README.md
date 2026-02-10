@@ -32,8 +32,8 @@ codex exec "hola"
 
 - Carpeta: `telegram-bot-nest/`
 - Copia `.env.example` a `.env` y coloca tu token de BotFather
-- `npm install`
-- `npm run start:dev`
+- `pnpm install`
+- `pnpm run start:dev`
 
 ## Voz (gratis)
 

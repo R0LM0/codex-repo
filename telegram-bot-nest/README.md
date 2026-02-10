@@ -9,8 +9,8 @@
 
 1. Copia `.env.example` a `.env`
 2. Agrega tu token
-3. npm install
-4. npm run start:dev
+3. pnpm install
+4. pnpm run start:dev
 
 ## Nota
 
