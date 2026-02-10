@@ -12,6 +12,10 @@
 3. npm install
 4. npm run start:dev
 
+## Nota
+
+Este bot usa `grammy` (no depende de `request`), por lo que evita los warnings de dependencias obsoletas.
+
 ## Voz
 
 - El bot descarga el audio y responde con texto.
